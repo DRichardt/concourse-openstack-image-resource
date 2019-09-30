@@ -76,5 +76,5 @@ func Check(request CheckRequest) ([]Version, error) {
 	if err := json.NewEncoder(os.Stdout).Encode(response); err != nil {
 		log.Fatalln(err)
 	}
-
+	return response, nil
 }
