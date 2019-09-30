@@ -10,8 +10,18 @@ import (
 
 func main() {
 	var request resource.CheckRequest
-	if err := json.NewDecoder(os.Stdin).Decode(&request); err != nil {
-		log.Fatalln("reading request from stdin", err)
+	if os.Getenv("Debug") == "true" {
+		file, err := os.Open("check.json")
+		if err != nil {
+			log.Fatalln(err)
+		}
+		if err := json.NewDecoder(file).Decode(&request); err != nil {
+			log.Fatalln("reading request from stdin", err)
+		}
+	} else {
+		if err := json.NewDecoder(os.Stdin).Decode(&request); err != nil {
+			log.Fatalln("reading request from stdin", err)
+		}
 	}
 
 	response, err := resource.Check(request)
