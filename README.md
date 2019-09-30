@@ -1,0 +1,1 @@
+concourse-openstack-image-resource
