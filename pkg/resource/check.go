@@ -50,7 +50,9 @@ func Check(request CheckRequest) ([]Version, error) {
 		log.Fatalln(err)
 	}
 	listOpts := images.ListOpts{
-		Name: request.Resource.Imagename,
+		Name:    request.Resource.Imagename,
+		SortKey: "created_at",
+		SortDir: "decending",
 	}
 
 	imagesClient, err := openstack.NewImageServiceV2(provider, gophercloud.EndpointOpts{
@@ -75,6 +77,9 @@ func Check(request CheckRequest) ([]Version, error) {
 	for _, image := range allImages {
 
 		response = append(response, Version{Ref: image.ID})
+		if request.Version.Ref == image.ID {
+			break
+		}
 
 	}
 	if err := json.NewEncoder(os.Stdout).Encode(response); err != nil {
