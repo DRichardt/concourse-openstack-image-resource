@@ -3,7 +3,6 @@ package resource
 import (
 	"io/ioutil"
 
-	"github.com/DRichardt/concourse-openstack-image-resource/pkg/resource"
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack"
 	"github.com/gophercloud/gophercloud/openstack/imageservice/v2/imagedata"
@@ -11,7 +10,7 @@ import (
 
 //In downloads a image from image store and save it to disk
 
-func In(request resource.InRequest, destinationDir string) (*resource.InResponse, error) {
+func In(request InRequest, destinationDir string) (*InResponse, error) {
 	opts := gophercloud.AuthOptions{
 		IdentityEndpoint: request.Resource.OsAuthURL,
 		Username:         request.Resource.OsUsername,
@@ -52,14 +51,14 @@ func In(request resource.InRequest, destinationDir string) (*resource.InResponse
 		return nil, err
 	}
 
-	response := resource.InResponse{
-		Version: resource.Version{Ref: request.Version.Ref},
-		Metadata: []resource.Metadata{
-			resource.Metadata{
+	response := InResponse{
+		Version: Version{Ref: request.Version.Ref},
+		Metadata: []Metadata{
+			Metadata{
 				Name:  "ImageID",
 				Value: imageID,
 			},
-			resource.Metadata{
+			Metadata{
 				Name:  "Name",
 				Value: request.Resource.Imagename,
 			},
