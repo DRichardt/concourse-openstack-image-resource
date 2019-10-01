@@ -28,3 +28,15 @@ type InRequest struct {
 	Resource Source  `json:"source"`
 	Version  Version `json:"version"`
 }
+
+//InResponse Struct contains formed Data for a in in a concourse resource
+type InResponse struct {
+	Version  Version    `json:"version"`
+	Metadata []Metadata `json:"metadata"`
+}
+
+//Metadata contains key value Pair for Metadata
+type Metadata struct {
+	Name  string `json:"name"`
+	Value string `json:"value"`
+}
