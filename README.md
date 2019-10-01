@@ -2,6 +2,8 @@
 
 checks and manages openstack images by a concourse
 
+https://godoc.org/github.com/DRichardt/concourse-openstack-image-resource/pkg/resource
+
 ## Adding to your pipeline
 
 To use Concourse Resource , you have to add a new resource_type for the concourse openstack resource
