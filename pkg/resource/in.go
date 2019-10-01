@@ -9,7 +9,6 @@ import (
 )
 
 //In downloads a image from image store and save it to disk
-
 func In(request InRequest, destinationDir string) (*InResponse, error) {
 	opts := gophercloud.AuthOptions{
 		IdentityEndpoint: request.Resource.OsAuthURL,
