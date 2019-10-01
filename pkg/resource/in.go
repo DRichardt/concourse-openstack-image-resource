@@ -2,6 +2,7 @@ package resource
 
 import (
 	"io/ioutil"
+	"path"
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack"
@@ -44,6 +45,7 @@ func In(request InRequest, destinationDir string) (*InResponse, error) {
 	}
 
 	savepath := "/tmp/" + request.Resource.Imagename
+	savepath = path.Clean(savepath)
 
 	err = ioutil.WriteFile(savepath, imageData, 0644)
 	if err != nil {
