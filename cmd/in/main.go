@@ -13,7 +13,7 @@ func main() {
 		log.Fatalln("usage: %s <dest directory>\n", os.Args[0])
 	}
 	destinationDir := os.Args[1]
-	var request resource.CheckRequest
+	var request resource.InRequest
 	if os.Getenv("Debug") == "true" {
 		file, err := os.Open("in.json")
 		if err != nil {
@@ -27,6 +27,7 @@ func main() {
 			log.Fatalln("reading request from stdin", err)
 		}
 	}
+
 	response, err := resource.In(request, destinationDir)
 	if err != nil {
 		log.Fatalln(err)
