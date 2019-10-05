@@ -33,6 +33,10 @@ func In(request InRequest, destinationDir string) (*InResponse, error) {
 
 	imageID := request.Version.Ref
 
+	myimage, err := images.Get(imageClient, imageID).Extract()
+	if err != nil {
+		return nil, err
+	}
 	savepath := destinationDir + request.Resource.Imagename
 	savepath = path.Clean(savepath)
 
@@ -52,6 +56,20 @@ func In(request InRequest, destinationDir string) (*InResponse, error) {
 		return nil, err
 	}
 
+	var metadataproperties []Metadata
+	prop := myimage.Properties
+	for k, p := range prop {
+		var m Metadata
+		m.Name = k
+		if str, ok := p.(string); ok {
+			m.Value = str
+		}
+		if _, ok := p.(bool); ok {
+			m.Value = "true"
+		}
+		metadataproperties = append(metadataproperties, m)
+	}
+
 	response := InResponse{
 		Version: Version{Ref: request.Version.Ref},
 		Metadata: []Metadata{
@@ -60,10 +78,33 @@ func In(request InRequest, destinationDir string) (*InResponse, error) {
 				Value: imageID,
 			},
 			Metadata{
-				Name:  "Name",
+				Name:  "name",
 				Value: request.Resource.Imagename,
 			},
+			Metadata{
+				Name:  "container format",
+				Value: myimage.ContainerFormat,
+			},
+			Metadata{
+				Name:  "disk format",
+				Value: myimage.DiskFormat,
+			},
+			Metadata{
+				Name:  "minimal disk",
+				Value: string(myimage.MinDiskGigabytes),
+			},
+			Metadata{
+				Name:  "minimal RAM",
+				Value: string(myimage.MinRAMMegabytes),
+			},
+			Metadata{
+				Name:  "visibility",
+				Value: string(myimage.Visibility),
+			},
 		},
+	}
+	for _, mp := range metadataproperties {
+		response.Metadata = append(response.Metadata, mp)
 	}
 
 	return &response, nil
