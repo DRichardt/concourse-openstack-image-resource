@@ -33,6 +33,9 @@ func In(request InRequest, destinationDir string) (*InResponse, error) {
 
 	imageID := request.Version.Ref
 
+	savepath := destinationDir + request.Resource.Imagename
+	savepath = path.Clean(savepath)
+
 	image, err := imagedata.Download(imageClient, imageID).Extract()
 
 	if err != nil {
@@ -43,9 +46,6 @@ func In(request InRequest, destinationDir string) (*InResponse, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	savepath := "/tmp/" + request.Resource.Imagename
-	savepath = path.Clean(savepath)
 
 	err = ioutil.WriteFile(savepath, imageData, 0644)
 	if err != nil {
