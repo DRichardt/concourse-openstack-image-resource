@@ -10,7 +10,7 @@ import (
 
 func main() {
 	if len(os.Args) < 2 {
-		log.Fatalln("usage: %s <dest directory>\n", os.Args[0])
+		log.Fatalf("usage: %s <dest directory>\n", os.Args[0])
 	}
 	destinationDir := os.Args[1]
 	var request resource.InRequest
