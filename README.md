@@ -29,3 +29,23 @@ resource_types:
 * `OS_PROJECT_NAME`: *Required.* The Openstack Project to use.
 
 * `Imagename`: *Required.* The Imagename to filter
+
+
+## Params
+
+* `file`: *Rquired* Path to file to upload
+
+* `container_format`: *Required* Container Format
+
+* `disk_format`: *Required* Disk Format
+
+* `visibility` *Required* Visability (private|shared|public|community)
+
+* `protected` *Required* Proteced (Bool)
+
+*  `min_disk`: Minimal RAM needed (Integer)
+
+*  `min_ram`: Minimal Disk needed (Integer)
+
+*  `properties`: JSON Object of additional properties (string)
+    i.e. (`"{\"architecture\": \"x86_64\",\"buildnumber\": \"20190926.2\",\"git_branch\":\"master\",\"hw_disk_bus\":\"scsi\",\"hw_video_ram\":\"16\",\"hw_vif_model\":\"VirtualVmxnet3\",\"hypervisor_type\":\"vmware\",\"os-version\":\"15.3\",\"vmware_adaptertype\":\"paraVirtual\",\"vmware_disktype\":\"streamOptimized\",\"vmware_ostype\":\"sles12_64Guest\"}"`)
