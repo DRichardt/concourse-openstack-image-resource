@@ -1,7 +1,8 @@
 package resource
 
 import (
-	"io/ioutil"
+	"io"
+	"os"
 	"path"
 
 	"github.com/gophercloud/gophercloud"
@@ -46,12 +47,13 @@ func In(request InRequest, destinationDir string) (*InResponse, error) {
 		return nil, err
 	}
 
-	imageData, err := ioutil.ReadAll(image)
+	out, err := os.Create(savepath)
 	if err != nil {
 		return nil, err
 	}
+	defer out.Close()
 
-	err = ioutil.WriteFile(savepath, imageData, 0644)
+	_, err = io.Copy(out, image)
 	if err != nil {
 		return nil, err
 	}
