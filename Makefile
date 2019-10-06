@@ -1,4 +1,4 @@
-IMAGE := DRichardt/concourse-openstack-image-resource
+IMAGE := drichardt/concourse-openstack-image-resource
 TAG   := 0.0.1
 
 build_linux: export GOOS=linux
