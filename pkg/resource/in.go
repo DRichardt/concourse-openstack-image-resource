@@ -8,6 +8,7 @@ import (
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack"
 	"github.com/gophercloud/gophercloud/openstack/imageservice/v2/imagedata"
+	"github.com/gophercloud/gophercloud/openstack/imageservice/v2/images"
 )
 
 //In downloads a image from image store and save it to disk
