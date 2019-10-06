@@ -1,5 +1,8 @@
 package resource
 
+import "github.com/gophercloud/gophercloud/openstack/imageservice/v2/images"
+
+
 //Source Strcut with Data for Concourse resource
 type Source struct {
 	OsUsername          string `json:"OS_USERNAME"`
@@ -39,4 +42,28 @@ type InResponse struct {
 type Metadata struct {
 	Name  string `json:"name"`
 	Value string `json:"value"`
+}
+
+//OutRequest contains formed data for concourse out 
+type OutRequest struct {
+	Resource Source    `json:"source"`
+	Params   OutParams `json:"params"`
+}
+
+//OutParams params for out
+type OutParams struct {
+	File			string	`json:"file"`
+	DiskFormat		string	`json:"disk_format"`
+	ContainerFormat	string	`json:"container_format"`
+	MinDisk			int		`json:"min_disk"`
+	MinRAM			int		`json:"min_ram"`
+	Visibility		images.ImageVisibility	`json:"visibility"`
+	Protected		bool	`json:"protected"`
+	Properties		string	`json:"properties"`
+}
+
+//OutResponse Response from Image Upload
+type OutResponse struct {
+	Version  Version    `json:"version"`
+	Metadata []Metadata `json:"metadata"`
 }
