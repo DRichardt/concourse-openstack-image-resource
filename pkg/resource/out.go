@@ -62,9 +62,15 @@ func Out(request OutRequest, BuildDir string) (*OutResponse, error) {
 		return nil, err
 	}
 	checksumdata, err := os.Open(filepath)
+	if err != nil {
+		return nil, err
+	}
 	defer checksumdata.Close()
 
 	imageData, err := os.Open(filepath)
+	if err != nil {
+		return nil, err
+	}
 	defer imageData.Close()
 
 	h := md5.New()
