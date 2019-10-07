@@ -49,6 +49,10 @@ resource_types:
 
 *  `min_ram`: Minimal Disk needed (Integer)
 
+*  `properties_by` : *Required* How to get properties (direct | file)
+
 *  `properties`: JSON Object of additional properties (string)
 
-    i.e. (`"{\"architecture\": \"x86_64\",\"buildnumber\": \"20190926.2\",\"git_branch\":\"master\",\"hw_disk_bus\":\"scsi\",\"hw_video_ram\":\"16\",\"hw_vif_model\":\"VirtualVmxnet3\",\"hypervisor_type\":\"vmware\",\"os-version\":\"15.3\",\"vmware_adaptertype\":\"paraVirtual\",\"vmware_disktype\":\"streamOptimized\",\"vmware_ostype\":\"sles12_64Guest\"}"`)
+    properties_by = direct (`"{\"architecture\": \"x86_64\",\"buildnumber\": \"20190926.2\",\"git_branch\":\"master\",\"hw_disk_bus\":\"scsi\",\"hw_video_ram\":\"16\",\"hw_vif_model\":\"VirtualVmxnet3\",\"hypervisor_type\":\"vmware\",\"os-version\":\"15.3\",\"vmware_adaptertype\":\"paraVirtual\",\"vmware_disktype\":\"streamOptimized\",\"vmware_ostype\":\"sles12_64Guest\"}"`)
+
+    properties_by = string (/tmp/properties.json)

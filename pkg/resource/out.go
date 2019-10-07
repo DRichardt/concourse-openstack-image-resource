@@ -50,9 +50,21 @@ func Out(request OutRequest, BuildDir string) (*OutResponse, error) {
 		MinRAM:          request.Params.MinRAM,
 		Visibility:      &request.Params.Visibility,
 	}
-	err = json.Unmarshal([]byte(request.Params.Properties), &createOpts.Properties)
-	if err != nil {
-		return nil, err
+	switch request.Params.PropertiesBy {
+	case "direct":
+		err = json.Unmarshal([]byte(request.Params.Properties), &createOpts.Properties)
+		if err != nil {
+			return nil, err
+		}
+	case "file":
+		propertiesfile, err := os.Open(filepath)
+		if err != nil {
+			return nil, err
+		}
+		defer propertiesfile.Close()
+		if err := json.NewDecoder(propertiesfile).Decode(&request.Params.Properties); err != nil {
+			return nil, err
+		}
 	}
 
 	imageresult := images.Create(imageClient, createOpts)
