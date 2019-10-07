@@ -14,6 +14,7 @@ func main() {
 	}
 	buildDir := os.Args[1]
 	var request resource.OutRequest
+	request.Params.DeleteBrokenImages = true
 	if os.Getenv("Debug") == "true" {
 		file, err := os.Open("out.json")
 		if err != nil {

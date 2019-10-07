@@ -87,6 +87,10 @@ func Out(request OutRequest, BuildDir string) (*OutResponse, error) {
 	if myimage.Checksum != filechecksum {
 		err = errors.New("Checksum doesn't match after upload")
 		return nil, err
+
+		if request.Params.DeleteBrokenImages == true {
+			images.Delete(imageClient, image.ID)
+		}
 	}
 
 	var metadataproperties []Metadata

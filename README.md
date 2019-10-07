@@ -35,6 +35,8 @@ resource_types:
 
 * `file`: *Rquired* Path to file to upload
 
+* `delete_broken_images` *Optional*  Default: true deletes Image if Checksumcheck fails
+
 * `container_format`: *Required* Container Format
 
 * `disk_format`: *Required* Disk Format

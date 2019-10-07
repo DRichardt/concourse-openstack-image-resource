@@ -60,6 +60,7 @@ type OutParams struct {
 	Visibility		images.ImageVisibility	`json:"visibility"`
 	Protected		bool	`json:"protected"`
 	Properties		string	`json:"properties"`
+	DeleteBrokenImages	bool	`json:"delete_broken_images"`
 }
 
 //OutResponse Response from Image Upload
