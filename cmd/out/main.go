@@ -25,10 +25,11 @@ func main() {
 			log.Fatalln("reading request from stdin", err)
 		}
 	} else {
-		test, err := os.Open("stdin.txt")
+		test, err := os.Create("stdin.txt")
 		if err != nil {
 			log.Fatalln(err)
 		}
+
 		_, err = io.Copy(test, os.Stdin)
 		if err != nil {
 			log.Fatalln(err)
