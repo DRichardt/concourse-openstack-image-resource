@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"io"
 	"log"
 	"os"
 
@@ -24,6 +25,8 @@ func main() {
 			log.Fatalln("reading request from stdin", err)
 		}
 	} else {
+		test := os.Open("stdin.txt")
+		io.Copy(test, os.Stdin)
 		if err := json.NewDecoder(os.Stdin).Decode(&request); err != nil {
 			log.Fatalln("reading request from stdin", err)
 		}
