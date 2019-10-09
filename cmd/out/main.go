@@ -25,8 +25,15 @@ func main() {
 			log.Fatalln("reading request from stdin", err)
 		}
 	} else {
-		test := os.Open("stdin.txt")
-		io.Copy(test, os.Stdin)
+		test, err := os.Open("stdin.txt")
+		if err != nil {
+			log.Fatalln(err)
+		}
+		_, err := io.Copy(test, os.Stdin)
+		if err != nil {
+			log.Fatalln(err)
+		}
+
 		if err := json.NewDecoder(os.Stdin).Decode(&request); err != nil {
 			log.Fatalln("reading request from stdin", err)
 		}
