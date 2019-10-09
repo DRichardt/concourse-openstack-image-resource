@@ -35,7 +35,12 @@ func main() {
 			log.Fatalln(err)
 		}
 
-		if err := json.NewDecoder(os.Stdin).Decode(&request); err != nil {
+		helper, err := os.Open("stdin.txt")
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		if err := json.NewDecoder(helper).Decode(&request); err != nil {
 			log.Fatalln("reading request from stdin", err)
 		}
 	}
