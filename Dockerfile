@@ -1,4 +1,4 @@
-FROM scratch
+FROM alpine
 
 ENV PATH /opt/resource:$PATH
 COPY bin/ /opt/resource/
