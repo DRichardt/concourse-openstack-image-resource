@@ -32,7 +32,7 @@ func Check(request CheckRequest) ([]Version, error) {
 	listOpts := images.ListOpts{
 		Name:    request.Resource.Imagename,
 		SortKey: "created_at",
-		SortDir: "decending",
+		SortDir: "desc",
 	}
 
 	imagesClient, err := openstack.NewImageServiceV2(provider, gophercloud.EndpointOpts{
