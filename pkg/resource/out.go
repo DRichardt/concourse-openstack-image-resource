@@ -5,9 +5,11 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"os"
 	"path"
+	"strings"
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack"
@@ -57,6 +59,7 @@ func Out(request OutRequest, BuildDir string) (*OutResponse, error) {
 	case "direct":
 		err = json.Unmarshal([]byte(request.Params.Properties), &createOpts.Properties)
 		if err != nil {
+
 			return nil, err
 		}
 	case "file":
@@ -66,6 +69,10 @@ func Out(request OutRequest, BuildDir string) (*OutResponse, error) {
 		}
 		defer propertiesfile.Close()
 		if err := json.NewDecoder(propertiesfile).Decode(&request.Params.Properties); err != nil {
+			var errstrings []string
+			errstrings = append(errstrings, "Error in unmarshal propertiesfile:")
+			errstrings = append(errstrings, err.Error())
+			err = fmt.Errorf(strings.Join(errstrings, " "))
 			return nil, err
 		}
 	}

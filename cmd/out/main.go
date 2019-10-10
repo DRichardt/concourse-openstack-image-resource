@@ -3,8 +3,10 @@ package main
 import (
 	"encoding/json"
 	"io"
+	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/DRichardt/concourse-openstack-image-resource/pkg/resource"
 )
@@ -50,6 +52,10 @@ func main() {
 	}
 
 	if err := json.NewEncoder(os.Stdout).Encode(response); err != nil {
+		var errstrings []string
+		errstrings = append(errstrings, "Error in Marshal Response:")
+		errstrings = append(errstrings, err.Error())
+		err = fmt.Errorf(strings.Join(errstrings, " "))
 		log.Fatalln("writing response to stdout", err)
 	}
 }
