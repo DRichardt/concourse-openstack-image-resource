@@ -43,7 +43,7 @@ func Out(request OutRequest, BuildDir string) (*OutResponse, error) {
 		return nil, err
 	}
 
-	filepath := request.Params.File
+	filepath := BuildDir + "/" + request.Params.File
 	filepath = path.Clean(filepath)
 
 	//case statement visability
@@ -64,7 +64,8 @@ func Out(request OutRequest, BuildDir string) (*OutResponse, error) {
 			return nil, err
 		}
 	case "file":
-		propertiesfilepath := request.Params.Properties
+		var propertiesfilepath string
+		propertiesfilepath = BuildDir + "/" + request.Params.Properties
 		propertiesfilepath = path.Clean(propertiesfilepath)
 		propertiesfile, err := os.Open(propertiesfilepath)
 		if err != nil {
