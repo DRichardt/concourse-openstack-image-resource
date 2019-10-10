@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+	"strconv"
 	"strings"
 
 	"github.com/gophercloud/gophercloud"
@@ -170,11 +171,11 @@ func Out(request OutRequest, BuildDir string) (*OutResponse, error) {
 			},
 			Metadata{
 				Name:  "minimal disk",
-				Value: string(myimage.MinDiskGigabytes),
+				Value: strconv.Itoa(myimage.MinDiskGigabytes),
 			},
 			Metadata{
 				Name:  "minimal RAM",
-				Value: string(myimage.MinRAMMegabytes),
+				Value: strconv.Itoa(myimage.MinRAMMegabytes),
 			},
 			Metadata{
 				Name:  "visibility",
