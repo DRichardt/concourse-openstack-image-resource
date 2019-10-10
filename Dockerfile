@@ -1,5 +1,6 @@
-FROM ubuntu
+FROM alpine
 
 ENV PATH /opt/resource:$PATH
-RUN apt-get update && apt-get install -y musl-dev && ln -s /usr/lib/x86_64-linux-musl/libc.so /lib/libc.musl-x86_64.so.1
+RUN apk add --no-cache ca-certificates libc6-compat && ln -s /lib/libpthread.so.0 /lib64/libpthread.so.2 && ln -s /lib/libpthread.so.0 /lib64/libpthread.so.0
+
 COPY bin/ /opt/resource/
