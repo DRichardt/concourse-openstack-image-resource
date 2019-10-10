@@ -18,7 +18,10 @@ func In(request InRequest, destinationDir string) (*InResponse, error) {
 		Username:         request.Resource.OsUsername,
 		Password:         request.Resource.OsPassword,
 		DomainName:       request.Resource.OsUserDomainName,
-		TenantName:       request.Resource.OsProjectName,
+		Scope: &gophercloud.AuthScope{
+			ProjectName: request.Resource.OsProjectName,
+			DomainName: request.Resource.OsProjectDomainName,
+		},
 	}
 
 	provider, err := openstack.AuthenticatedClient(opts)
