@@ -4,6 +4,7 @@ import (
 	"io"
 	"os"
 	"path"
+	"strconv"
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack"
@@ -97,11 +98,11 @@ func In(request InRequest, destinationDir string) (*InResponse, error) {
 			},
 			Metadata{
 				Name:  "minimal disk",
-				Value: string(myimage.MinDiskGigabytes),
+				Value: strconv.Itoa(myimage.MinDiskGigabytes),
 			},
 			Metadata{
 				Name:  "minimal RAM",
-				Value: string(myimage.MinRAMMegabytes),
+				Value: strconv.Itoa(myimage.MinRAMMegabytes),
 			},
 			Metadata{
 				Name:  "visibility",
