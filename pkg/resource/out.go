@@ -60,7 +60,9 @@ func Out(request OutRequest, BuildDir string) (*OutResponse, error) {
 			return nil, err
 		}
 	case "file":
-		propertiesfile, err := os.Open(filepath)
+		propertiesfilepath := request.Params.Properties
+		propertiesfilepath = path.Clean(propertiesfilepath)
+		propertiesfile, err := os.Open(propertiesfilepath)
 		if err != nil {
 			return nil, err
 		}
