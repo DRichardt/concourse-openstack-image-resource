@@ -1,5 +1,5 @@
-FROM alpine
+FROM ubuntu
 
 ENV PATH /opt/resource:$PATH
-RUN apk add -q libc6-compat && ln -s /lib/libpthread.so.0 /lib64/libpthread.so.2 && ln -s /lib/libpthread.so.0 /lib64/libpthread.so.0
+
 COPY bin/ /opt/resource/
