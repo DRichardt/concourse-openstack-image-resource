@@ -52,16 +52,16 @@ type OutRequest struct {
 
 //OutParams params for out
 type OutParams struct {
-	File			string	`json:"file"`
-	DiskFormat		string	`json:"disk_format"`
-	ContainerFormat	string	`json:"container_format"`
-	MinDisk			int		`json:"min_disk"`
-	MinRAM			int		`json:"min_ram"`
-	Visibility		images.ImageVisibility	`json:"visibility"`
-	Protected		bool	`json:"protected"`
-	Properties		string	`json:"properties"`
-	PropertiesBy	string `json:"properties_by"`
-	DeleteBrokenImages	bool	`json:"delete_broken_images"`
+	File               string                 `json:"file"`
+	DiskFormat         string                 `json:"disk_format"`
+	ContainerFormat    string                 `json:"container_format"`
+	MinDisk            int                    `json:"min_disk"`
+	MinRAM             int                    `json:"min_ram"`
+	Visibility         images.ImageVisibility `json:"visibility"`
+	Protected          bool                   `json:"protected"`
+	Properties         string                 `json:"properties"`
+	PropertiesBy       string                 `json:"properties_by"`
+	DeleteBrokenImages bool                   `json:"delete_broken_images"`
 }
 
 //OutResponse Response from Image Upload
