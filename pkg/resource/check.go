@@ -1,13 +1,9 @@
 package resource
 
 import (
-	"encoding/json"
-	"log"
-	"os"
-
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack"
-
+	"github.com/gophercloud/gophercloud/openstack/identity/v3/tokens"
 	"github.com/gophercloud/gophercloud/openstack/imageservice/v2/images"
 )
 
@@ -21,35 +17,46 @@ func Check(request CheckRequest) ([]Version, error) {
 		DomainName:       request.Resource.OsUserDomainName,
 		Scope: &gophercloud.AuthScope{
 			ProjectName: request.Resource.OsProjectName,
-			DomainName: request.Resource.OsProjectDomainName,
+			DomainName:  request.Resource.OsProjectDomainName,
 		},
 	}
 
 	provider, err := openstack.AuthenticatedClient(opts)
 	if err != nil {
-		log.Fatalln(err)
+		return nil, err
 	}
+
+	identityclient, err := openstack.NewIdentityV3(provider, gophercloud.EndpointOpts{
+		Region: request.Resource.OsRegion,
+	})
+
+	project, err := tokens.Get(identityclient, provider.Token()).ExtractProject()
+	if err != nil {
+		return nil, err
+	}
+
 	listOpts := images.ListOpts{
 		Name:    request.Resource.Imagename,
 		SortKey: "created_at",
 		SortDir: "desc",
+		Owner:   project.ID,
 	}
 
 	imagesClient, err := openstack.NewImageServiceV2(provider, gophercloud.EndpointOpts{
 		Region: request.Resource.OsRegion,
 	})
 	if err != nil {
-		log.Fatalln(err)
+		return nil, err
 	}
 
 	allPages, err := images.List(imagesClient, listOpts).AllPages()
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	allImages, err := images.ExtractImages(allPages)
 	if err != nil {
-		log.Fatalln(err)
+		return nil, err
 	}
 
 	response := []Version{}
