@@ -10,14 +10,105 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+	"regexp"
 	"strconv"
 	"strings"
 
+	"github.com/dustin/go-humanize"
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack"
+	"github.com/gophercloud/gophercloud/openstack/identity/v3/domains"
+	"github.com/gophercloud/gophercloud/openstack/identity/v3/projects"
+	"github.com/gophercloud/gophercloud/openstack/identity/v3/users"
 	"github.com/gophercloud/gophercloud/openstack/imageservice/v2/imagedata"
 	"github.com/gophercloud/gophercloud/openstack/imageservice/v2/images"
+	"github.com/sapcc/gophercloud-limes/resources"
+	limesprojects "github.com/sapcc/gophercloud-limes/resources/v1/projects"
 )
+
+//GetProjectIDAndDomainIDByToken Searches for a Project and Domain in Scope of the actual Token.
+func GetProjectIDAndDomainIDByToken(identityClient *gophercloud.ServiceClient, Username string, OsUserDomainName string, ProjectName string) (string, string, error) {
+
+	userlistOpts := users.ListOpts{
+		Name:     Username,
+		DomainID: OsUserDomainName,
+	}
+
+	allUserPages, err := users.List(identityClient, userlistOpts).AllPages()
+	if err != nil {
+		return "", "", err
+	}
+
+	allUsers, err := users.ExtractUsers(allUserPages)
+	if err != nil {
+		return "", "", err
+	}
+
+	allProjectPages, err := users.ListProjects(identityClient, allUsers[0].ID).AllPages()
+	if err != nil {
+		return "", "", err
+	}
+
+	allProjects, err := projects.ExtractProjects(allProjectPages)
+	if err != nil {
+		return "", "", err
+	}
+
+	for _, project := range allProjects {
+		if project.Name == ProjectName {
+			return project.DomainID, project.ID, nil
+		}
+	}
+	err = fmt.Errorf("Could not find Project with the given User. Check Permissions")
+	return "nil", "nil", err
+}
+
+//GetProjectUUIDByProjectname searchs for the UUID of a Project
+func GetProjectUUIDByProjectname(identityClient *gophercloud.ServiceClient, ProjectName string) (string, error) {
+	listopts := projects.ListOpts{
+		Enabled: gophercloud.Enabled,
+		Name:    ProjectName,
+	}
+
+	allPages, err := projects.List(identityClient, listopts).AllPages()
+	if err != nil {
+		return "", err
+	}
+
+	allProjects, err := projects.ExtractProjects(allPages)
+	if err != nil {
+		return "", err
+	}
+
+	return allProjects[0].ID, nil
+
+}
+
+func GetDomainUUIDByDomainname(identityClient *gophercloud.ServiceClient, DomainName string) (string, error) {
+	listopts := domains.ListOpts{
+		Enabled: gophercloud.Enabled,
+		Name:    DomainName,
+	}
+
+	allPages, err := domains.List(identityClient, listopts).AllPages()
+	if err != nil {
+		return "", err
+	}
+
+	allProjects, err := domains.ExtractDomains(allPages)
+	if err != nil {
+		return "", err
+	}
+
+	return allProjects[0].ID, nil
+
+}
+
+//IsValidUUID checks if string is valid UUID
+func IsValidUUID(uuid string) bool {
+	r := regexp.MustCompile("^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-4[a-fA-F0-9]{3}-[8|9|aA|bB][a-fA-F0-9]{3}-[a-fA-F0-9]{12}$")
+	return r.MatchString(uuid)
+}
 
 //Out Uploads image to openstack
 func Out(request OutRequest, BuildDir string) (*OutResponse, error) {
@@ -33,6 +124,13 @@ func Out(request OutRequest, BuildDir string) (*OutResponse, error) {
 	}
 
 	provider, err := openstack.AuthenticatedClient(opts)
+	if err != nil {
+		return nil, err
+	}
+
+	identitiyClient, err := openstack.NewIdentityV3(provider, gophercloud.EndpointOpts{
+		Region: request.Resource.OsRegion,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -90,6 +188,65 @@ func Out(request OutRequest, BuildDir string) (*OutResponse, error) {
 			return nil, err
 		}
 
+	}
+	filesizedata, err := os.Open(filepath)
+	defer filesizedata.Close()
+	if err != nil {
+		return nil, err
+	}
+	fi, err := filesizedata.Stat()
+	if err != nil {
+		// Could not obtain stat, handle error
+	}
+
+	if request.Params.CheckQuota == true {
+		limesclient, err := resources.NewLimesV1(provider, gophercloud.EndpointOpts{
+			Region: request.Resource.OsRegion,
+		})
+		if err != nil {
+			var errstrings []string
+			errstrings = append(errstrings, "Error while creating limes client:")
+			errstrings = append(errstrings, err.Error())
+			err = fmt.Errorf(strings.Join(errstrings, "\n"))
+			return nil, err
+		}
+
+		limesopts := limesprojects.GetOpts{Service: "object-store"}
+		if err != nil {
+			return nil, err
+		}
+
+		opts.Scope.DomainID, opts.Scope.ProjectID, err = GetProjectIDAndDomainIDByToken(identitiyClient, request.Resource.OsUsername, request.Resource.OsUserDomainName, request.Resource.OsProjectName)
+		if err != nil {
+			return nil, err
+		}
+		if err != nil {
+			return nil, err
+		}
+		limesquotarequest, err := limesprojects.Get(limesclient, opts.Scope.DomainID, opts.Scope.ProjectID, limesopts).Extract()
+		if err != nil {
+			var errstrings []string
+			errstrings = append(errstrings, "Error while Limes request:")
+			errstrings = append(errstrings, err.Error())
+			err = fmt.Errorf(strings.Join(errstrings, "\n"))
+			return nil, err
+		}
+		limesquota := limesquotarequest.Services["object-store"].Resources["capacity"]
+		filesize := fi.Size()
+
+		if int64(limesquota.Usage)+fi.Size() > int64(limesquota.Quota) {
+			var errstrings []string
+
+			errstrings = append(errstrings, "Error: not enogh Quota for Uploading Image. Please incease object-store-quota\n")
+			errorstring := fmt.Sprintf("Actual Quota: %s (%s)", humanize.Bytes(uint64(limesquota.Quota)), strconv.FormatUint(limesquota.Quota, 10))
+			errstrings = append(errstrings, errorstring)
+			errorstring = fmt.Sprintf("Usage: %s (%s)", humanize.Bytes(uint64(limesquota.Usage)), strconv.FormatUint(limesquota.Usage, 10))
+			errstrings = append(errstrings, errorstring)
+			errorstring = fmt.Sprintf("Filesize: %s (%s)", humanize.Bytes(uint64(filesize)), strconv.FormatInt(filesize, 10))
+			errstrings = append(errstrings, errorstring)
+			err = fmt.Errorf(strings.Join(errstrings, "\n"))
+			return nil, err
+		}
 	}
 
 	imageresult := images.Create(imageClient, createOpts)

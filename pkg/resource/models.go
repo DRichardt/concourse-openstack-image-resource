@@ -62,6 +62,7 @@ type OutParams struct {
 	Properties         string                 `json:"properties"`
 	PropertiesBy       string                 `json:"properties_by"`
 	DeleteBrokenImages bool                   `json:"delete_broken_images"`
+	CheckQuota 		   bool 				  `json:"check_quota"`
 }
 
 //OutResponse Response from Image Upload
