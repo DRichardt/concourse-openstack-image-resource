@@ -17,34 +17,22 @@ import (
 	"github.com/dustin/go-humanize"
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack"
-	"github.com/gophercloud/gophercloud/openstack/identity/v3/domains"
 	"github.com/gophercloud/gophercloud/openstack/identity/v3/projects"
+	"github.com/gophercloud/gophercloud/openstack/identity/v3/tokens"
 	"github.com/gophercloud/gophercloud/openstack/identity/v3/users"
 	"github.com/gophercloud/gophercloud/openstack/imageservice/v2/imagedata"
 	"github.com/gophercloud/gophercloud/openstack/imageservice/v2/images"
 	"github.com/sapcc/gophercloud-limes/resources"
+
+	//	limesdomains "github.com/sapcc/gophercloud-limes/resources/v1/domains"
+
 	limesprojects "github.com/sapcc/gophercloud-limes/resources/v1/projects"
 )
 
 //GetProjectIDAndDomainIDByToken Searches for a Project and Domain in Scope of the actual Token.
-func GetProjectIDAndDomainIDByToken(identityClient *gophercloud.ServiceClient, Username string, OsUserDomainName string, ProjectName string) (string, string, error) {
+func GetProjectIDAndDomainIDByToken(identityClient *gophercloud.ServiceClient, UserID string, OsUserDomainName string, ProjectName string) (string, string, error) {
 
-	userlistOpts := users.ListOpts{
-		Name:     Username,
-		DomainID: OsUserDomainName,
-	}
-
-	allUserPages, err := users.List(identityClient, userlistOpts).AllPages()
-	if err != nil {
-		return "", "", err
-	}
-
-	allUsers, err := users.ExtractUsers(allUserPages)
-	if err != nil {
-		return "", "", err
-	}
-
-	allProjectPages, err := users.ListProjects(identityClient, allUsers[0].ID).AllPages()
+	allProjectPages, err := users.ListProjects(identityClient, UserID).AllPages()
 	if err != nil {
 		return "", "", err
 	}
@@ -61,47 +49,6 @@ func GetProjectIDAndDomainIDByToken(identityClient *gophercloud.ServiceClient, U
 	}
 	err = fmt.Errorf("Could not find Project with the given User. Check Permissions")
 	return "nil", "nil", err
-}
-
-//GetProjectUUIDByProjectname searchs for the UUID of a Project
-func GetProjectUUIDByProjectname(identityClient *gophercloud.ServiceClient, ProjectName string) (string, error) {
-	listopts := projects.ListOpts{
-		Enabled: gophercloud.Enabled,
-		Name:    ProjectName,
-	}
-
-	allPages, err := projects.List(identityClient, listopts).AllPages()
-	if err != nil {
-		return "", err
-	}
-
-	allProjects, err := projects.ExtractProjects(allPages)
-	if err != nil {
-		return "", err
-	}
-
-	return allProjects[0].ID, nil
-
-}
-
-func GetDomainUUIDByDomainname(identityClient *gophercloud.ServiceClient, DomainName string) (string, error) {
-	listopts := domains.ListOpts{
-		Enabled: gophercloud.Enabled,
-		Name:    DomainName,
-	}
-
-	allPages, err := domains.List(identityClient, listopts).AllPages()
-	if err != nil {
-		return "", err
-	}
-
-	allProjects, err := domains.ExtractDomains(allPages)
-	if err != nil {
-		return "", err
-	}
-
-	return allProjects[0].ID, nil
-
 }
 
 //IsValidUUID checks if string is valid UUID
@@ -131,6 +78,11 @@ func Out(request OutRequest, BuildDir string) (*OutResponse, error) {
 	identitiyClient, err := openstack.NewIdentityV3(provider, gophercloud.EndpointOpts{
 		Region: request.Resource.OsRegion,
 	})
+	if err != nil {
+		return nil, err
+	}
+
+	userid, err := tokens.Get(identitiyClient, identitiyClient.Token()).ExtractUser()
 	if err != nil {
 		return nil, err
 	}
@@ -216,7 +168,7 @@ func Out(request OutRequest, BuildDir string) (*OutResponse, error) {
 			return nil, err
 		}
 
-		opts.Scope.DomainID, opts.Scope.ProjectID, err = GetProjectIDAndDomainIDByToken(identitiyClient, request.Resource.OsUsername, request.Resource.OsUserDomainName, request.Resource.OsProjectName)
+		opts.Scope.DomainID, opts.Scope.ProjectID, err = GetProjectIDAndDomainIDByToken(identitiyClient, userid.ID, request.Resource.OsUserDomainName, request.Resource.OsProjectName)
 		if err != nil {
 			return nil, err
 		}
