@@ -216,24 +216,36 @@ func Out(request OutRequest, BuildDir string) (*OutResponse, error) {
 
 	checksumdata, err := os.Open(filepath)
 	if err != nil {
+		if request.Params.DeleteBrokenImages == true {
+			images.Delete(imageClient, image.ID)
+		}
 		return nil, err
 	}
 	defer checksumdata.Close()
 
 	imageData, err := os.Open(filepath)
 	if err != nil {
+		if request.Params.DeleteBrokenImages == true {
+			images.Delete(imageClient, image.ID)
+		}
 		return nil, err
 	}
 	defer imageData.Close()
 	fmt.Fprintf(os.Stderr, "generating checksum of local file.. \n")
 	h := md5.New()
 	if _, err := io.Copy(h, checksumdata); err != nil {
+		if request.Params.DeleteBrokenImages == true {
+			images.Delete(imageClient, image.ID)
+		}
 		return nil, err
 	}
 	fmt.Fprintf(os.Stderr, "generating checksum of local file: done \n")
 	fmt.Fprintf(os.Stderr, "starting upload imagedata to glance \n")
 	err = imagedata.Upload(imageClient, image.ID, imageData).ExtractErr()
 	if err != nil {
+		if request.Params.DeleteBrokenImages == true {
+			images.Delete(imageClient, image.ID)
+		}
 		return nil, err
 	}
 
@@ -241,6 +253,9 @@ func Out(request OutRequest, BuildDir string) (*OutResponse, error) {
 	fmt.Fprintf(os.Stderr, "fetching image information of new created image: %s \n", image.ID)
 	myimage, err := images.Get(imageClient, image.ID).Extract()
 	if err != nil {
+		if request.Params.DeleteBrokenImages == true {
+			images.Delete(imageClient, image.ID)
+		}
 		return nil, err
 	}
 
