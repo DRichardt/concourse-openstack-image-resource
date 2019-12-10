@@ -59,6 +59,7 @@ func IsValidUUID(uuid string) bool {
 
 //Out Uploads image to openstack
 func Out(request OutRequest, BuildDir string) (*OutResponse, error) {
+	fmt.Fprintf(os.Stderr, "starting...\n")
 	opts := gophercloud.AuthOptions{
 		IdentityEndpoint: request.Resource.OsAuthURL,
 		Username:         request.Resource.OsUsername,
@@ -70,11 +71,12 @@ func Out(request OutRequest, BuildDir string) (*OutResponse, error) {
 		},
 	}
 
+	fmt.Fprintf(os.Stderr, "authentificating...\n")
 	provider, err := openstack.AuthenticatedClient(opts)
 	if err != nil {
 		return nil, err
 	}
-
+	fmt.Fprintf(os.Stderr, "authentificating: done\n")
 	identitiyClient, err := openstack.NewIdentityV3(provider, gophercloud.EndpointOpts{
 		Region: request.Resource.OsRegion,
 	})
@@ -152,6 +154,7 @@ func Out(request OutRequest, BuildDir string) (*OutResponse, error) {
 	}
 
 	if request.Params.CheckQuota == true {
+		fmt.Fprintf(os.Stderr, "checking limes for quota...\n")
 		limesclient, err := resources.NewLimesV1(provider, gophercloud.EndpointOpts{
 			Region: request.Resource.OsRegion,
 		})
@@ -199,14 +202,18 @@ func Out(request OutRequest, BuildDir string) (*OutResponse, error) {
 			err = fmt.Errorf(strings.Join(errstrings, "\n"))
 			return nil, err
 		}
+		fmt.Fprintf(os.Stderr, "limesquotachecking: done\n")
+	} else {
+		fmt.Fprintf(os.Stderr, "limesquotachecking: skipped\n")
 	}
-
+	fmt.Fprintf(os.Stderr, "creating image: ... \n")
 	imageresult := images.Create(imageClient, createOpts)
-
+	fmt.Fprintf(os.Stderr, "creating image: done \n")
 	image, err := imageresult.Extract()
 	if err != nil {
 		return nil, err
 	}
+
 	checksumdata, err := os.Open(filepath)
 	if err != nil {
 		return nil, err
@@ -218,19 +225,20 @@ func Out(request OutRequest, BuildDir string) (*OutResponse, error) {
 		return nil, err
 	}
 	defer imageData.Close()
-
+	fmt.Fprintf(os.Stderr, "generating checksum of local file.. \n")
 	h := md5.New()
 	if _, err := io.Copy(h, checksumdata); err != nil {
 		return nil, err
 	}
-
+	fmt.Fprintf(os.Stderr, "generating checksum of local file: done \n")
+	fmt.Fprintf(os.Stderr, "starting upload imagedata to glance \n")
 	err = imagedata.Upload(imageClient, image.ID, imageData).ExtractErr()
 	if err != nil {
 		return nil, err
 	}
 
 	filechecksum := hex.EncodeToString(h.Sum(nil))
-
+	fmt.Fprintf(os.Stderr, "fetching image information of new created image: %s \n", image.ID)
 	myimage, err := images.Get(imageClient, image.ID).Extract()
 	if err != nil {
 		return nil, err
@@ -244,6 +252,7 @@ func Out(request OutRequest, BuildDir string) (*OutResponse, error) {
 			images.Delete(imageClient, image.ID)
 		}
 	}
+	fmt.Fprintf(os.Stderr, "checksum matched\n")
 
 	var metadataproperties []Metadata
 	prop := myimage.Properties
