@@ -2,7 +2,6 @@ package resource
 
 import "github.com/gophercloud/gophercloud/openstack/imageservice/v2/images"
 
-
 //Source Strcut with Data for Concourse resource
 type Source struct {
 	OsUsername          string `json:"OS_USERNAME"`
@@ -44,7 +43,7 @@ type Metadata struct {
 	Value string `json:"value"`
 }
 
-//OutRequest contains formed data for concourse out 
+//OutRequest contains formed data for concourse out
 type OutRequest struct {
 	Resource Source    `json:"source"`
 	Params   OutParams `json:"params"`
@@ -62,7 +61,7 @@ type OutParams struct {
 	Properties         string                 `json:"properties"`
 	PropertiesBy       string                 `json:"properties_by"`
 	DeleteBrokenImages bool                   `json:"delete_broken_images"`
-	CheckQuota 		   bool 				  `json:"check_quota"`
+	CheckQuota         bool                   `json:"check_quota"`
 }
 
 //OutResponse Response from Image Upload
