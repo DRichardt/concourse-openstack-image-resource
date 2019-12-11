@@ -21,7 +21,7 @@ func In(request InRequest, destinationDir string) (*InResponse, error) {
 		DomainName:       request.Resource.OsUserDomainName,
 		Scope: &gophercloud.AuthScope{
 			ProjectName: request.Resource.OsProjectName,
-			DomainName: request.Resource.OsProjectDomainName,
+			DomainName:  request.Resource.OsProjectDomainName,
 		},
 	}
 
