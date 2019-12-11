@@ -47,7 +47,7 @@ func GetProjectIDAndDomainIDByToken(identityClient *gophercloud.ServiceClient, U
 			return project.DomainID, project.ID, nil
 		}
 	}
-	err = fmt.Errorf("Could not find Project with the given User. Check Permissions")
+	err = fmt.Errorf("Could not find project with the given User. Please check permissions")
 	return "nil", "nil", err
 }
 
@@ -59,7 +59,7 @@ func IsValidUUID(uuid string) bool {
 
 //Out Uploads image to openstack
 func Out(request OutRequest, BuildDir string) (*OutResponse, error) {
-	fmt.Fprintf(os.Stderr, "starting...\n")
+	fmt.Fprintf(os.Stderr, "Starting...\n")
 	opts := gophercloud.AuthOptions{
 		IdentityEndpoint: request.Resource.OsAuthURL,
 		Username:         request.Resource.OsUsername,
@@ -71,12 +71,12 @@ func Out(request OutRequest, BuildDir string) (*OutResponse, error) {
 		},
 	}
 
-	fmt.Fprintf(os.Stderr, "authentificating...\n")
+	fmt.Fprintf(os.Stderr, "Authentificating... ")
 	provider, err := openstack.AuthenticatedClient(opts)
 	if err != nil {
 		return nil, err
 	}
-	fmt.Fprintf(os.Stderr, "authentificating: done\n")
+	fmt.Fprintf(os.Stderr, "done\n")
 	identitiyClient, err := openstack.NewIdentityV3(provider, gophercloud.EndpointOpts{
 		Region: request.Resource.OsRegion,
 	})
@@ -134,7 +134,7 @@ func Out(request OutRequest, BuildDir string) (*OutResponse, error) {
 		err = json.Unmarshal(propertiesdata, &createOpts.Properties)
 		if err != nil {
 			var errstrings []string
-			errstrings = append(errstrings, "Error in unmarshal propertiesfile:")
+			errstrings = append(errstrings, "\nError in unmarshal propertiesfile:")
 			errstrings = append(errstrings, err.Error())
 			errstrings = append(errstrings, "Body is:")
 			errstrings = append(errstrings, string(propertiesdata))
@@ -154,13 +154,13 @@ func Out(request OutRequest, BuildDir string) (*OutResponse, error) {
 	}
 
 	if request.Params.CheckQuota == true {
-		fmt.Fprintf(os.Stderr, "checking limes for quota...\n")
+		fmt.Fprintf(os.Stderr, "Checking limes for quota... ")
 		limesclient, err := resources.NewLimesV1(provider, gophercloud.EndpointOpts{
 			Region: request.Resource.OsRegion,
 		})
 		if err != nil {
 			var errstrings []string
-			errstrings = append(errstrings, "Error while creating limes client:")
+			errstrings = append(errstrings, "\nError while creating limes client:")
 			errstrings = append(errstrings, err.Error())
 			err = fmt.Errorf(strings.Join(errstrings, "\n"))
 			return nil, err
@@ -181,7 +181,7 @@ func Out(request OutRequest, BuildDir string) (*OutResponse, error) {
 		limesquotarequest, err := limesprojects.Get(limesclient, opts.Scope.DomainID, opts.Scope.ProjectID, limesopts).Extract()
 		if err != nil {
 			var errstrings []string
-			errstrings = append(errstrings, "Error while Limes request:")
+			errstrings = append(errstrings, "\nError while limes request:")
 			errstrings = append(errstrings, err.Error())
 			err = fmt.Errorf(strings.Join(errstrings, "\n"))
 			return nil, err
@@ -192,8 +192,8 @@ func Out(request OutRequest, BuildDir string) (*OutResponse, error) {
 		if int64(limesquota.Usage)+fi.Size() > int64(limesquota.Quota) {
 			var errstrings []string
 
-			errstrings = append(errstrings, "Error: not enogh Quota for Uploading Image. Please incease object-store-quota\n")
-			errorstring := fmt.Sprintf("Actual Quota: %s (%s)", humanize.Bytes(uint64(limesquota.Quota)), strconv.FormatUint(limesquota.Quota, 10))
+			errstrings = append(errstrings, "\nError: not enogh quota to upload the image. Please incease objectstore quota\n")
+			errorstring := fmt.Sprintf("Actual quota: %s (%s)", humanize.Bytes(uint64(limesquota.Quota)), strconv.FormatUint(limesquota.Quota, 10))
 			errstrings = append(errstrings, errorstring)
 			errorstring = fmt.Sprintf("Usage: %s (%s)", humanize.Bytes(uint64(limesquota.Usage)), strconv.FormatUint(limesquota.Usage, 10))
 			errstrings = append(errstrings, errorstring)
@@ -202,13 +202,13 @@ func Out(request OutRequest, BuildDir string) (*OutResponse, error) {
 			err = fmt.Errorf(strings.Join(errstrings, "\n"))
 			return nil, err
 		}
-		fmt.Fprintf(os.Stderr, "limesquotachecking: done\n")
+		fmt.Fprintf(os.Stderr, "done\n")
 	} else {
-		fmt.Fprintf(os.Stderr, "limesquotachecking: skipped\n")
+		fmt.Fprintf(os.Stderr, "skipped\n")
 	}
-	fmt.Fprintf(os.Stderr, "creating image: ... \n")
+	fmt.Fprintf(os.Stderr, "creating image... ")
 	imageresult := images.Create(imageClient, createOpts)
-	fmt.Fprintf(os.Stderr, "creating image: done \n")
+	fmt.Fprintf(os.Stderr, "done\n")
 	image, err := imageresult.Extract()
 	if err != nil {
 		return nil, err
@@ -231,7 +231,7 @@ func Out(request OutRequest, BuildDir string) (*OutResponse, error) {
 		return nil, err
 	}
 	defer imageData.Close()
-	fmt.Fprintf(os.Stderr, "generating checksum of local file.. \n")
+	fmt.Fprintf(os.Stderr, "Generating checksum of local file... ")
 	h := md5.New()
 	if _, err := io.Copy(h, checksumdata); err != nil {
 		if request.Params.DeleteBrokenImages == true {
@@ -239,8 +239,8 @@ func Out(request OutRequest, BuildDir string) (*OutResponse, error) {
 		}
 		return nil, err
 	}
-	fmt.Fprintf(os.Stderr, "generating checksum of local file: done \n")
-	fmt.Fprintf(os.Stderr, "starting upload imagedata to glance \n")
+	fmt.Fprintf(os.Stderr, "done\n")
+	fmt.Fprintf(os.Stderr, "Starting upload imagedata to glance... \n") # needs a "done" somewhere..."
 	err = imagedata.Upload(imageClient, image.ID, imageData).ExtractErr()
 	if err != nil {
 		if request.Params.DeleteBrokenImages == true {
@@ -250,7 +250,7 @@ func Out(request OutRequest, BuildDir string) (*OutResponse, error) {
 	}
 
 	filechecksum := hex.EncodeToString(h.Sum(nil))
-	fmt.Fprintf(os.Stderr, "fetching image information of new created image: %s \n", image.ID)
+	fmt.Fprintf(os.Stderr, "Fetching image information of new created image: %s ... ", image.ID)
 	myimage, err := images.Get(imageClient, image.ID).Extract()
 	if err != nil {
 		if request.Params.DeleteBrokenImages == true {
@@ -260,7 +260,7 @@ func Out(request OutRequest, BuildDir string) (*OutResponse, error) {
 	}
 
 	if myimage.Checksum != filechecksum {
-		err = errors.New("Checksum doesn't match after upload")
+		err = errors.New("Checksum doesn't match after upload\n")
 		return nil, err
 
 		if request.Params.DeleteBrokenImages == true {
