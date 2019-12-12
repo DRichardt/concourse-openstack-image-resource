@@ -240,7 +240,7 @@ func Out(request OutRequest, BuildDir string) (*OutResponse, error) {
 		return nil, err
 	}
 	fmt.Fprintf(os.Stderr, "done\n")
-	fmt.Fprintf(os.Stderr, "Starting upload imagedata to glance... \n") # needs a "done" somewhere..."
+	fmt.Fprintf(os.Stderr, "Starting upload imagedata to glance... ")
 	err = imagedata.Upload(imageClient, image.ID, imageData).ExtractErr()
 	if err != nil {
 		if request.Params.DeleteBrokenImages == true {
@@ -248,7 +248,7 @@ func Out(request OutRequest, BuildDir string) (*OutResponse, error) {
 		}
 		return nil, err
 	}
-
+	fmt.Fprintf(os.Stderr, "done\n")
 	filechecksum := hex.EncodeToString(h.Sum(nil))
 	fmt.Fprintf(os.Stderr, "Fetching image information of new created image: %s ... ", image.ID)
 	myimage, err := images.Get(imageClient, image.ID).Extract()
