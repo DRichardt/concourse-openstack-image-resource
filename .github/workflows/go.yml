@@ -28,5 +28,5 @@ jobs:
       run: |
         export GOOS=linux
         go build -v -o bin/check ./cmd/check
-        go build -v -o bin/in ./cmd/check
-        go build -v -o bin/in ./cmd/check
+        go build -v -o bin/in ./cmd/in
+        go build -v -o bin/out ./cmd/out
